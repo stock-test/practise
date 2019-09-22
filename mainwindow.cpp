@@ -13,6 +13,10 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    Qt::WindowFlags wf = windowFlags();
+    wf = Qt::WindowStaysOnTopHint;
+    setWindowFlags(wf);
+
     mCurPrice = ui->price; // 当前价格
     mPositionEdit = ui->position_edit; // 买入卖出数量
     mKeepPositionEdit = ui->keep_position_edit; // 持仓数
@@ -20,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mStockValueEdit = ui->stock_value; // 市场价值
     mBalanceEdit = ui->balance; // 余额
     mInitBalance = ui->init_value; // 初始资金
-    mInitBalance->setText("10000");
-    mBalanceEdit->setText("10000");
+    mInitBalance->setText("100000");
+    mBalanceEdit->setText("100000");
     mKeepPositionEdit->setText("0");
 
     mBalance = mBalanceEdit->text().toInt();
@@ -50,10 +54,16 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::onLong()
 {
-    int curPrice = mCurPrice->text().toInt();
+    double curPrice = mCurPrice->text().toDouble();
     // 买卖头寸数量
     int position = mPositionEdit->text().toInt();
     int value = curPrice * position * 100;
+    if (mBalance - value <= 0) {
+        QMessageBox msgBox;
+        msgBox.setText("余额不足");
+        msgBox.exec();
+        return;
+    }
 
     // 更新均价
     int sumPosition = position + mKeepPosition;
@@ -80,26 +90,30 @@ void MainWindow::onLong()
 
 void MainWindow::onShort()
 {
-    if (mKeepPosition == 0) {
-        return;
-    }
-
     // 买卖头寸数量
-    int curPrice = mCurPrice->text().toInt();
+    double curPrice = mCurPrice->text().toDouble();
     int position = mPositionEdit->text().toInt();
     int value = curPrice * position * 100;
+
+    // 更新均价
+    int sumPosition = mKeepPosition - position;
+    if (sumPosition == 0) {
+        mAverage = 0;
+    }
+
+    mAverageEdit->setText(QString("%1").arg(mAverage));
 
     // 更新持有头寸
     mKeepPosition -= position;
     mKeepPositionEdit->setText(QString("%1").arg(mKeepPosition));
 
-    // 更新余额
-    mBalance += value;
-    mBalanceEdit->setText(QString("%1").arg(mBalance));
-
     // 更新市场价值
     mCurValue = mKeepPosition * 100 * mAverage;
     mStockValueEdit->setText(QString("%1").arg(mCurValue));
+
+    // 更新余额
+    mBalance += value;
+    mBalanceEdit->setText(QString("%1").arg(mBalance));
 }
 
 void MainWindow::onReset()
