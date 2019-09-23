@@ -17,18 +17,24 @@ MainWindow::MainWindow(QWidget *parent) :
     wf = Qt::WindowStaysOnTopHint;
     setWindowFlags(wf);
 
-    mCurPrice = ui->price; // 当前价格
+    mCurPriceEdit = ui->price; // 当前价格
     mPositionEdit = ui->position_edit; // 买入卖出数量
     mKeepPositionEdit = ui->keep_position_edit; // 持仓数
     mAverageEdit = ui->average; // 持仓均价
     mStockValueEdit = ui->stock_value; // 市场价值
     mBalanceEdit = ui->balance; // 余额
     mInitBalance = ui->init_value; // 初始资金
+    mCalculateEdit = ui->cal_edit;
     mInitBalance->setText("100000");
     mBalanceEdit->setText("100000");
     mKeepPositionEdit->setText("0");
-
     mBalance = mBalanceEdit->text().toInt();
+
+    connect(mPositionEdit, &QLineEdit::textChanged, this, [=]{
+        double cur = mCurPriceEdit->text().toDouble();
+        int pos = mPositionEdit->text().toInt();
+        mCalculateEdit->setText(QString("%1").arg(pos * cur));
+    });
 
     mLongBtn = ui->long_btn;
     mShortBtn = ui->short_btn;
@@ -54,7 +60,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 
 void MainWindow::onLong()
 {
-    double curPrice = mCurPrice->text().toDouble();
+    double curPrice = mCurPriceEdit->text().toDouble();
     // 买卖头寸数量
     int position = mPositionEdit->text().toInt();
     int value = curPrice * position * 100;
@@ -91,7 +97,7 @@ void MainWindow::onLong()
 void MainWindow::onShort()
 {
     // 买卖头寸数量
-    double curPrice = mCurPrice->text().toDouble();
+    double curPrice = mCurPriceEdit->text().toDouble();
     int position = mPositionEdit->text().toInt();
     int value = curPrice * position * 100;
 

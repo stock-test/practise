@@ -28,13 +28,14 @@ private:
 
     Ui::MainWindow *ui;
 
-    QLineEdit* mCurPrice;
+    QLineEdit* mCurPriceEdit;
     QLineEdit* mPositionEdit;
     QLineEdit* mKeepPositionEdit;
     QLineEdit* mAverageEdit;
     QLineEdit* mStockValueEdit;
     QLineEdit* mBalanceEdit;
     QLineEdit* mInitBalance;
+    QLineEdit* mCalculateEdit;
 
     QPushButton* mResetBtn;
     QPushButton* mLongBtn;
